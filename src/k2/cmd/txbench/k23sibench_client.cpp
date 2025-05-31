@@ -220,7 +220,7 @@ private:
                     return seastar::make_ready_future();
                 }
 
-                EndResult result = fut.get0();
+                EndResult result = fut.get();
 
                 if (result.status.is2xxOK()) {
                     if (willCommit) {

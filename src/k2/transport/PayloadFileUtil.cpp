@@ -91,7 +91,7 @@ bool fileutil::writeFile(Payload&& payload, String path) {
     payload.truncateToCurrent();
     auto leftBytes = payload.getSize();
 
-    int fd = ::open(path.c_str(), O_CREAT | O_WRONLY);
+    int fd = ::open(path.c_str(), O_CREAT | O_WRONLY, 0644);
     if (fd < 0) {
         K2LOG_E(log::tx, "Unable to open file for writing {}: {}", path, strerror(errno));
         return false;

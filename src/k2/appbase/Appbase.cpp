@@ -53,28 +53,9 @@ int App::start(int argc, char** argv) {
     ("log_level", bpo::value<std::vector<k2::String>>()->multitoken(), "A list(space-delimited) of log levels. The very first entry must be one of VERBOSE|DEBUG|INFO|WARN|ERROR|FATAL and it sets the global log level. Subsequent entries are of the form <log_module_name>=<log_level> and allow the user to override the log level for particular log modules")
     ;
 
-    //modify some seastar::reactor default options so that it's straight-forward to write simple apps (1 core/50M memory)
-    {
-        auto smpopt = _app.get_options_description().find_nothrow("smp", false);
-        if (smpopt) {
-            boost::shared_ptr<bpo::value_semantic> semval = boost::const_pointer_cast<bpo::value_semantic>(smpopt->semantic());
-            boost::shared_ptr<bpo::typed_value<unsigned>> tval = boost::dynamic_pointer_cast<bpo::typed_value<unsigned>>(semval);
-            K2ASSERT(log::appbase, tval, "unable to find existing value for smp arg");
-            tval->default_value(1);
-        }
-    }
-    {
-        auto memopt = _app.get_options_description().find_nothrow("memory", false);
-        if (memopt) {
-            boost::shared_ptr<bpo::value_semantic> semval = boost::const_pointer_cast<bpo::value_semantic>(memopt->semantic());
-            boost::shared_ptr<bpo::typed_value<std::string>> tval = boost::dynamic_pointer_cast<bpo::typed_value<std::string>>(semval);
-            K2ASSERT(log::appbase, tval, "unable to find existing value for memory arg");
-            tval->default_value("50M");
-        }
-    }
     // we are now ready to assemble the running application
-    auto result = _app.run_deprecated(argc, argv, [&] {
-        auto& config = _app.configuration();
+    auto result = _app->run_deprecated(argc, argv, [&] {
+        auto& config = _app->configuration();
         return seastar::smp::invoke_on_all([&] {
             // setup log configuration in each core
             k2::logging::Logger::threadId = seastar::this_shard_id();
@@ -137,6 +118,8 @@ int App::start(int argc, char** argv) {
             } else {
                 tcpProtobuilder = k2::TCPRPCProtocol::builder(std::ref(vnet));
             }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
             // call the stop() method on each object when we're about to exit. This also deletes the objects
             seastar::engine().at_exit([&] {
@@ -188,6 +171,7 @@ int App::start(int argc, char** argv) {
                         return seastar::make_ready_future();
                     });
             });
+#pragma GCC diagnostic pop
             return seastar::make_ready_future();
         })
         // OBJECT CREATION (via distributed<>.start())
@@ -277,6 +261,10 @@ int App::start(int argc, char** argv) {
                 startFutures.push_back(starter());
             }
             return seastar::when_all_succeed(startFutures.begin(), startFutures.end()).discard_result();
+        })
+        .then([]() {
+            K2LOG_I(log::appbase, "Startup sequence completed successfully");
+            return seastar::make_ready_future<>();
         })
         .handle_exception([](auto exc) {
             K2LOG_W_EXC(log::appbase, exc, "Startup sequence failed");

@@ -52,7 +52,7 @@ template<typename Func>
                 this->_try++;
                 return func().
                     then_wrapped([this] (auto&& fut) {
-                        _success = !fut.failed() && fut.get0();
+                        _success = !fut.failed() && fut.get();
                         K2LOG_D(log::ycsb, "round {} ended with success={}", _try, _success);
                         return seastar::make_ready_future<>();
                     });
@@ -172,7 +172,7 @@ private:
                     return seastar::make_ready_future<bool>(false);
                 }
 
-                EndResult result = fut.get0();
+                EndResult result = fut.get();
                 if (result.status.is2xxOK() && !_failed) {
 
                     return seastar::make_ready_future<bool>(true);
@@ -284,7 +284,7 @@ private:
                     return seastar::make_exception_future<>(std::runtime_error("Insert failed!"));
                 }
 
-                WriteResult result = fut.get0();
+                WriteResult result = fut.get();
                 if (result.status.is2xxOK() || result.status.code == 412) { // key inserted or already exists
                     if(_requestDist->getMaxValue() < _keyid) { // update bounds of distribution
                         _requestDist->updateBounds(0,_keyid);

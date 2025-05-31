@@ -37,7 +37,7 @@ Copyright(c) 2020 Futurewei Cloud
 
 // performance of stdout with line-flush seems best ~800ns per call.
 // For comparison, stderr's performance is ~6000-7000ns
-#define K2LOG_STREAM std::cout
+#define K2LOG_STREAM stdout
 
 #define DO_K2LOG_LEVEL_FMT(level, module, fmt_str, ...)                            \
     {                                                                              \
@@ -52,7 +52,7 @@ Copyright(c) 2020 Futurewei Cloud
                    __LINE__,                                                       \
                    __FUNCTION__,                                                   \
                    ##__VA_ARGS__);                                                 \
-        K2LOG_STREAM << std::flush;                                                \
+        ::fflush(K2LOG_STREAM);                                                    \
     }
 
 #define K2LOG_LEVEL_FMT(level, logger, fmt_str, ...)                     \

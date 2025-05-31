@@ -63,10 +63,6 @@ public:
 
     size_t hash() const;
 
-    String print() const {
-        return printTime(TimePoint{} + 1ns*endCount);
-    }
-
     // set this timestamp to min of this and other, based on certain comparison
     void minEq(const Timestamp& other);
 

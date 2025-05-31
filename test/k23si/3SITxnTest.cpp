@@ -1277,9 +1277,9 @@ seastar::future<> testScenario01() {
                     return seastar::when_all(doRead(key1, mtr, collname, ErrorCaseOpt::NoInjection), doRead(key2, mtr, collname, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) mutable {
                         auto& [resp1, resp2] = response;
-                        // move resp out of the incoming futures sice get0() returns an rvalue
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        // move resp out of the incoming futures sice get() returns an rvalue
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, val1, cmpRec1);
@@ -1346,9 +1346,9 @@ seastar::future<> testScenario01() {
                     return seastar::when_all(doRead(key1, mtr, collname, ErrorCaseOpt::NoInjection), doRead(key2, mtr, collname, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) mutable {
                         auto& [resp1, resp2] = response;
-                        // move resp out of the incoming futures sice get0() returns an rvalue
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        // move resp out of the incoming futures sice get() returns an rvalue
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, val1, cmpRec1);
@@ -1414,9 +1414,9 @@ seastar::future<> testScenario02() {
                 )
                 .then([&, mtr] (auto&& response) mutable {
                     auto& [resp1, resp2] = response;
-                    // move resp out of the incoming futures sice get0() returns an rvalue
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    // move resp out of the incoming futures sice get() returns an rvalue
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
 
@@ -1585,11 +1585,11 @@ seastar::future<> testScenario02() {
                     doRead(k4, mtr, collname, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) mutable {
                     auto& [resp1, resp2, resp3, resp4] = response;
-                    // move resp out of the incoming futures since get0() returns an rvalue
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
-                    auto [status3, val3] = resp3.get0();
-                    auto [status4, val4] = resp4.get0();
+                    // move resp out of the incoming futures since get() returns an rvalue
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
+                    auto [status3, val3] = resp3.get();
+                    auto [status4, val4] = resp4.get();
 
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
@@ -1771,9 +1771,9 @@ seastar::future<> testScenario02() {
                     doWrite(k13, v1, mtr13, k13, collname, false, true, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) mutable {
                     auto& [resp1, resp2, resp3] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
-                    auto [status3, val3] = resp3.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
+                    auto [status3, val3] = resp3.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status3, dto::K23SIStatus::Created);
@@ -1785,10 +1785,10 @@ seastar::future<> testScenario02() {
                         doEnd(k13, mtr13, collname, false, {k13}, Duration(113ms),ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) mutable {
                         auto& [resp1, resp2, resp3] = response;
-                        // move resp out of the incoming futures sice get0() returns an rvalue
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
-                        auto [status3, val3] = resp3.get0();
+                        // move resp out of the incoming futures sice get() returns an rvalue
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
+                        auto [status3, val3] = resp3.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status3, dto::K23SIStatus::OK);
@@ -1801,10 +1801,10 @@ seastar::future<> testScenario02() {
                         doRead(k13, mtr13, collname, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) mutable {
                         auto& [resp1, resp2, resp3] = response;
-                        // move resp out of the incoming futures sice get0() returns an rvalue
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
-                        auto [status3, val3] = resp3.get0();
+                        // move resp out of the incoming futures sice get() returns an rvalue
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
+                        auto [status3, val3] = resp3.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status3, dto::K23SIStatus::OK);
@@ -1889,8 +1889,8 @@ seastar::future<> testScenario04() {
                     doRead(k1, mtrB, collname, ErrorCaseOpt::NoInjection))
                 .then([&v0](auto&& response) mutable {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, val1, v0);
@@ -1971,8 +1971,8 @@ seastar::future<> testScenario04() {
                     return seastar::when_all(doRead(k1, mtrC, collname, ErrorCaseOpt::NoInjection), doRead(k1, mtrD, collname, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, val1, v1);
@@ -2310,8 +2310,8 @@ seastar::future<> testScenario06() {
                     doWrite(k2, v0, mtr, k1, collname, false, false, ErrorCaseOpt::NoInjection))
             .then([](auto&& response) mutable {
                 auto& [resp1, resp2] = response;
-                auto [status1, val1] = resp1.get0();
-                auto [status2, val2] = resp2.get0();
+                auto [status1, val1] = resp1.get();
+                auto [status2, val2] = resp2.get();
                 K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                 K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
             })
@@ -2341,9 +2341,9 @@ seastar::future<> testScenario06() {
                         doRead(k3, otherMtr, collname, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) mutable {
                     auto& [resp1, resp2, resp3] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
-                    auto [status3, val3] = resp3.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
+                    auto [status3, val3] = resp3.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::KeyNotFound);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status3, dto::K23SIStatus::KeyNotFound);
@@ -2377,8 +2377,8 @@ seastar::future<> testScenario06() {
                 doWrite(k5, v0, mtr, k4, collname, false, false, ErrorCaseOpt::NoInjection))
             .then([](auto&& response) {
                 auto& [resp1, resp2] = response;
-                auto [status1, val1] = resp1.get0();
-                auto [status2, val2] = resp2.get0();
+                auto [status1, val1] = resp1.get();
+                auto [status2, val2] = resp2.get();
                 K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                 K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
             })
@@ -2428,9 +2428,9 @@ seastar::future<> testScenario06() {
                         doRead(k6, otherMtr, collname, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) mutable {
                         auto& [resp1, resp2, resp3] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
-                        auto [status3, val3] = resp3.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
+                        auto [status3, val3] = resp3.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::KeyNotFound);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status3, dto::K23SIStatus::OK);
@@ -2454,8 +2454,8 @@ seastar::future<> testScenario06() {
                     doWrite(k5, v0, mtr, k5, collname, false, false, ErrorCaseOpt::NoInjection))
             .then([](auto&& response) mutable {
                 auto& [resp1, resp2] = response;
-                auto [status1, val1] = resp1.get0();
-                auto [status2, val2] = resp2.get0();
+                auto [status1, val1] = resp1.get();
+                auto [status2, val2] = resp2.get();
                 K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                 K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
             })
@@ -2491,8 +2491,8 @@ seastar::future<> testScenario06() {
                     doWrite(k8, v0, mtr, k7, collname, false, false, ErrorCaseOpt::NoInjection))
             .then([](auto&& response) mutable {
                 auto& [resp1, resp2] = response;
-                auto [status1, val1] = resp1.get0();
-                auto [status2, val2] = resp2.get0();
+                auto [status1, val1] = resp1.get();
+                auto [status2, val2] = resp2.get();
                 K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                 K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
             })
@@ -2525,8 +2525,8 @@ seastar::future<> testScenario06() {
                 return seastar::when_all(doRead(k7, otherMtr, collname, ErrorCaseOpt::NoInjection), doRead(k8, otherMtr, collname, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) mutable {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::KeyNotFound);
                     K2EXPECT(log::k23si, val1, v0);
@@ -2579,8 +2579,8 @@ seastar::future<> testScenario07() {
                     doWrite(k2, v0, mtr, k1, collname, false, false, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                 })
@@ -2602,8 +2602,8 @@ seastar::future<> testScenario07() {
                     return seastar::when_all(doInspectRecords(k1, collname), doInspectWIs(k2))
                     .then([&](auto&& response)  {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, val1.records.size(), 1);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
@@ -2625,8 +2625,8 @@ seastar::future<> testScenario07() {
                     doWrite(k2, v0, mtr2, k1, collname, false, false, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                 })
@@ -2641,8 +2641,8 @@ seastar::future<> testScenario07() {
                     return seastar::when_all(doInspectWIs(k1), doInspectRecords(k2, collname))
                     .then([&](auto&& response)  {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         bool found = false;
                         for (const k2::dto::WriteIntent& WI : val1.WIs) {
@@ -2664,8 +2664,8 @@ seastar::future<> testScenario07() {
                     doWrite(k2, v0, mtr3, k1, collname, false, false, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                 })
@@ -2680,8 +2680,8 @@ seastar::future<> testScenario07() {
                     return seastar::when_all(doInspectRecords(k1, collname), doInspectWIs(k2))
                     .then([&](auto&& response)  {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
 
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, val1.records.size(), 1);
@@ -2706,8 +2706,8 @@ seastar::future<> testScenario07() {
                     doWrite(k2, v0, mtr4, k1, collname, false, false, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                 })
@@ -2722,8 +2722,8 @@ seastar::future<> testScenario07() {
                     return seastar::when_all(doInspectWIs(k1), doInspectRecords(k2, collname))
                     .then([&](auto&& response)  {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
 
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         bool found = false;
@@ -2745,8 +2745,8 @@ seastar::future<> testScenario07() {
                         doWrite(k2, v0, mtr5, k1, collname, false, false, ErrorCaseOpt::NoInjection))
                 .then([&](auto&& response) {
                     auto& [resp1, resp2] = response;
-                    auto [status1, val1] = resp1.get0();
-                    auto [status2, val2] = resp2.get0();
+                    auto [status1, val1] = resp1.get();
+                    auto [status2, val2] = resp2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::Created);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::Created);
                 })
@@ -2755,8 +2755,8 @@ seastar::future<> testScenario07() {
                             doFinalize(k2, mtr5, collname, false, ErrorCaseOpt::NoInjection))
                     .then([&](auto&& response) {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     });
@@ -2783,8 +2783,8 @@ seastar::future<> testScenario07() {
                     return seastar::when_all(doInspectTxn(k1, mtr5, collname), doInspectTxn(k1, mtr6, collname))
                     .then([&](auto&& response) {
                         auto& [resp1, resp2] = response;
-                        auto [status1, val1] = resp1.get0();
-                        auto [status2, val2] = resp2.get0();
+                        auto [status1, val1] = resp1.get();
+                        auto [status2, val2] = resp2.get();
                         K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                         K2EXPECT(log::k23si, status2, dto::K23SIStatus::KeyNotFound);
                         K2EXPECT(log::k23si, val1.state, dto::TxnRecordState::ForceAborted);

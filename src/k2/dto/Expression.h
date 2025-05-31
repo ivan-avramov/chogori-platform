@@ -89,11 +89,13 @@ struct Value {
             os << obj;
         }
     }
-
-    friend std::ostream& operator<<(std::ostream&os, const Value& v) {
+    
+    // custom formatting
+    template <typename FormatContext>
+    static auto ___K2___INTERNAL_fmt_helper(const Value& v, FormatContext& ctx) {
+        std::ostringstream os;
         os << "{type= " << v.type << ", fieldName= " << v.fieldName << ", literal= ";
 
-        std::ostringstream lit;
         if (v.isReference()) {
             os << "REFERENCE";
         } else {
@@ -108,8 +110,10 @@ struct Value {
                 }
             }
         }
-
-        return os << "}";
+        os << "}";
+        return fmt::format_to(ctx.out(),
+                FMT_STRING("{}"),
+                os.str());
     }
 };
 

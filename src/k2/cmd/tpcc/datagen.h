@@ -31,6 +31,7 @@ Copyright(c) 2020 Futurewei Cloud
 
 #include "schema.h"
 #include "tpcc_rand.h"
+#include <boost/range/irange.hpp>
 
 typedef std::vector<std::function<seastar::future<k2::WriteResult>(k2::K2TxnHandle&)>> TPCCData;
 

@@ -40,11 +40,11 @@ Prometheus::Prometheus() {
     K2LOG_D(log::prom, "Prometheus ctor");
 }
 
-seastar::future<std::unique_ptr<seastar::httpd::reply>>
+seastar::future<std::unique_ptr<seastar::http::reply>>
 Prometheus::_pullMetrics() {
-    auto req = std::make_unique<seastar::httpd::request>();
-    auto rep = std::make_unique<seastar::httpd::reply>();
-    auto handler = _prometheusServer.server().local()._routes.get_handler(seastar::operation_type::GET, "/metrics", req->param);
+    auto req = std::make_unique<seastar::http::request>();
+    auto rep = std::make_unique<seastar::http::reply>();
+    auto handler = _prometheusServer.server().local()._routes.get_handler(seastar::httpd::operation_type::GET, "/metrics", req->param);
 
     return handler->handle("", std::move(req), std::move(rep))
         .then([] (auto&& rep) {

@@ -70,7 +70,7 @@ future<> AtomicVerify::getVerificationValues(ValuesToCompare& values) {
     })
     .then_wrapped([this] (auto&& fut) {
         K2ASSERT(log::tpcc, !fut.failed(), "Txn end failed");
-        EndResult result = fut.get0();
+        EndResult result = fut.get();
         K2ASSERT(log::tpcc, result.status.is2xxOK(), "Txn end failed, bad status: {}", result.status);
     });
 }
@@ -649,7 +649,7 @@ future<> ConsistencyVerify::runForEachWarehouse(consistencyOp op) {
             K2LOG_W_EXC(log::tpcc, fut.get_exception(), "Txn failed");
             K2ASSERT(log::tpcc, false, "Txn failed");
         }
-        EndResult result = fut.get0();
+        EndResult result = fut.get();
         K2ASSERT(log::tpcc, result.status.is2xxOK(), "Txn end failed, bad status: {}", result.status);
     });
 }
@@ -688,7 +688,7 @@ future<> ConsistencyVerify::runForEachWarehouseDistrict(consistencyOp op) {
             K2LOG_W_EXC(log::tpcc, fut.get_exception(), "Txn failed");
             K2ASSERT(log::tpcc, false, "Txn failed with exception {}", fut.get_exception());
         }
-        EndResult result = fut.get0();
+        EndResult result = fut.get();
         K2ASSERT(log::tpcc, result.status.is2xxOK(), "Txn end failed, bad status: {}", result.status);
     });
 }

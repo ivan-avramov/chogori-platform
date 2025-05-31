@@ -480,9 +480,9 @@ seastar::future<> runScenario04() {
                 })
                 .then([&](auto&& result) mutable {
                     auto& [r1, r2] = result;
-                    // apparently, have to move these out of the incoming futures since get0() returns an rvalue
-                    auto [status1, result1] = r1.get0();
-                    auto [status2, result2] = r2.get0();
+                    // apparently, have to move these out of the incoming futures since get() returns an rvalue
+                    auto [status1, result1] = r1.get();
+                    auto [status2, result2] = r2.get();
                     // first txn gets aborted in this scenario since on push, the newer txn wins. The status should not be OK
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OperationNotAllowed);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
@@ -497,8 +497,8 @@ seastar::future<> runScenario04() {
                 })
                 .then([&](auto&& result) mutable {
                     auto& [r1, r2] = result;
-                    auto [status1, value1] = r1.get0();
-                    auto [status2, value2] = r2.get0();
+                    auto [status1, value1] = r1.get();
+                    auto [status2, value2] = r2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::KeyNotFound);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     DataRec d2{"fk2", "f2"};
@@ -554,16 +554,16 @@ seastar::future<> runScenario05() {
                 })
                 .then([&](auto&& result) mutable {
                     auto& [r1, r2] = result;
-                    auto [status1, result1] = r1.get0();
-                    auto [status2, result2] = r2.get0();
+                    auto [status1, result1] = r1.get();
+                    auto [status2, result2] = r2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     return seastar::when_all(doRead(k1, m1, collname), doRead(k2, m2, collname));
                 })
                 .then([&](auto&& result) mutable {
                     auto& [r1, r2] = result;
-                    auto [status1, value1] = r1.get0();
-                    auto [status2, value2] = r2.get0();
+                    auto [status1, value1] = r1.get();
+                    auto [status2, value2] = r2.get();
                     K2EXPECT(log::k23si, status1, dto::K23SIStatus::OK);
                     K2EXPECT(log::k23si, status2, dto::K23SIStatus::OK);
                     DataRec d1{"fk1", "f2"};

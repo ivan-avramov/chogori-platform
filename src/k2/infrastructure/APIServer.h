@@ -50,12 +50,40 @@ static const inline std::vector<String> ContentTypeStrings = {
     "application/x-msgpack",
     "application/octet-stream"
 };
-
 struct HTTPPayload {
     String data;
     ContentType ctype;
     std::vector<ContentType> accepts;
 };
+
+}
+template <> // fmt support
+struct fmt::formatter<k2::ContentType> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(k2::ContentType const& ctp, FormatContext& ctx) const {
+        return fmt::format_to(ctx.out(), "{}", k2::ContentTypeStrings[k2::to_integral(ctp)]);
+    }
+};
+template <> // fmt support
+struct fmt::formatter<k2::HTTPPayload> {
+    template <typename ParseContext>
+    constexpr auto parse(ParseContext& ctx) {
+        return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(k2::HTTPPayload const& hp, FormatContext& ctx) const {
+        return fmt::format_to(ctx.out(), "HTTPPayload(data={}, ctype={}, accepts={})",
+            hp.data, hp.ctype, hp.accepts);
+    }
+};
+namespace k2 {
+
 
 using APIRawObserver_t = std::function<seastar::future<HTTPPayload>(HTTPPayload&&)>;
 
@@ -68,8 +96,8 @@ public:
     template<typename HandlerFunc>
     APIRouteHandler(HandlerFunc&& h) : _handler(std::forward<HandlerFunc>(h)) {}
 
-    seastar::future<std::unique_ptr<seastar::httpd::reply>> handle(const String& path,
-        std::unique_ptr<seastar::httpd::request> req, std::unique_ptr<seastar::httpd::reply> rep) override;
+    seastar::future<std::unique_ptr<seastar::http::reply>> handle(const String& path,
+        std::unique_ptr<seastar::http::request> req, std::unique_ptr<seastar::http::reply> rep) override;
 
 private:
     APIRawObserver_t _handler;
@@ -102,15 +130,8 @@ auto _handleK2PAYLOADRequest(HTTPPayload& req, Func&& observer) {
 template<typename Statuses_T, typename Request_T, typename Response_T, typename Func>
 auto _handleMSGPACKRequest(HTTPPayload& req, Func&& observer) {
     using Status_T= typename GetStatus_T<Statuses_T>::type;
-    {
-        Request_T newt{};
-        skv::http::MPackWriter wtr;
-        wtr.write(newt);
-        skv::http::Binary b;
-        auto fr = wtr.flush(b);
-        K2LOG_D(log::apisvr, "example of incoming msgpack request of type {}, encodes as={}, can be serialized={}", k2::type_name<Request_T>(), String(b.data(), b.size()), fr);
-    }
-    K2LOG_D(log::apisvr, "handling incoming msgpack request of type {}, {}", k2::type_name<Request_T>(), req.data);
+
+    K2LOG_D(log::apisvr, "handling incoming msgpack request of type {}, {}", k2::type_name<Request_T>(), HexCodec::encode(req.data));
     auto shp = seastar::make_lw_shared<String>(std::move(req.data));
     skv::http::Binary bin(shp->data(), shp->size(), [shp] {});
     skv::http::MPackReader reader(bin);

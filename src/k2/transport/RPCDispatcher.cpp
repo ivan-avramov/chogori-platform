@@ -76,6 +76,7 @@ RPCDispatcher::registerProtocol(seastar::reference_wrapper<RPCProtocolFactory::D
         url_core = std::make_pair(serverep->url, seastar::this_shard_id());
         K2LOG_D(log::tx, "BroadCast URL and Core ID {}", serverep->url);
         return RPCDist().invoke_on_all([url_core](RPCDispatcher& disp) {
+            K2LOG_D(log::tx, "Setting address core {}", url_core);
             return disp.setAddressCore(url_core);
         });
     }

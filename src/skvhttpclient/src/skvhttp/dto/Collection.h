@@ -61,13 +61,13 @@ struct Key {
     size_t partitionHash() const noexcept;
 
     K2_SERIALIZABLE(Key, schemaName, partitionKey, rangeKey);
-
-    friend std::ostream& operator<<(std::ostream& os, const Key& key) {
-        return os << fmt::format(
-            "{{schemaName={}, partitionKey={}, rangeKey={}}}",
-            key.schemaName,
-            HexCodec::encode(key.partitionKey),
-            HexCodec::encode(key.rangeKey));
+    template <typename FormatContext>
+    static auto ___K2___INTERNAL_fmt_helper(const Key& k, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(),
+                FMT_STRING("{{schemaName={}, partitionKey={}, rangeKey={}}}"),
+                k.schemaName,
+                HexCodec::encode(k.partitionKey),
+                HexCodec::encode(k.rangeKey));
     }
 };
 

@@ -57,7 +57,7 @@ private:
   };
 
 public:
-    HTTPMessageClient(std::string server = "localhost", int port = 30000): client(server, port) {}
+    HTTPMessageClient(std::string server, int port): client(server, port) {}
 
     // send a single HTTP message and return the status and expected response object
     template <typename RequestT, typename ResponseT>
@@ -173,7 +173,7 @@ typedef std::unordered_map<std::string, std::unordered_map<std::string, std::uno
 
 class Client {
 public:
-    Client(std::string server = "localhost", int port = 30000) : _HTTPClient(server, port) {}
+    Client(std::string server, int port) : _HTTPClient(server, port) {}
     ~Client() = default;
     boost::future<Response<>> createSchema(const String& collectionName, const dto::Schema& schema);
     boost::future<Response<std::shared_ptr<dto::Schema>>> getSchema(const String& collectionName, const String& schemaName, int64_t schemaVersion=dto::ANY_SCHEMA_VERSION);

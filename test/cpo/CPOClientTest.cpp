@@ -80,7 +80,8 @@ namespace k2 {
             };
             return _cpoClient.createAndWaitForCollection(Deadline<>(100ms), std::move(request.metadata), std::move(request.rangeEnds))
             .then([this] (auto&& status) {
-                K2EXPECT(k2::log::cpo_client_test, status.is4xxNonRetryable(), true);
+                K2LOG_I(k2::log::cpo_client_test, "createAndWaitForCollection returned status: {}", status);
+                K2EXPECT(k2::log::cpo_client_test, status.is5xxRetryable(), true);
             });
         }
         seastar::future<> start() {

@@ -192,24 +192,15 @@ public:
     struct PartitionWithEndpoint {
         Partition* partition;
         std::unique_ptr<TXEndpoint> preferredEndpoint;
-        friend std::ostream& operator<<(std::ostream& os, const PartitionWithEndpoint& pwe) {
-            os << "partition: ";
-            if (!pwe.partition) {
-                os << "(null)";
-            }
-            else {
-                os << *pwe.partition;
-            }
-            os << ", preferred endpoint: ";
-            if (!pwe.preferredEndpoint) {
-                os << "(null)";
-            }
-            else {
-                os << *pwe.preferredEndpoint;
-            }
 
-            return os;
+        template <typename FormatContext>
+        static auto ___K2___INTERNAL_fmt_helper(const PartitionWithEndpoint& pwe, FormatContext& ctx) {
+            return fmt::format_to(ctx.out(),
+                    FMT_STRING("{{partition: {}, preferred endpoint: {}}}"),
+                    pwe.partition ? *pwe.partition : Partition{},
+                    pwe.preferredEndpoint ? *pwe.preferredEndpoint : TXEndpoint{});
         }
+
     };
 
     PartitionGetter(Collection&& collection);

@@ -100,14 +100,6 @@ inline Timestamp_ts toTimestamp_ts(const TimePoint& tp) {
     auto [days, hours] = std::div(quotient4, 24);
     return {(uint16_t)micros, (uint16_t)millis, (uint8_t)secs, (uint8_t)mins, (uint8_t)hours, (uint16_t)days};
 }
-
-inline const char* printTime(const TimePoint& tp) {
-    auto ts = toTimestamp_ts(tp);
-    static thread_local char buffer[24];
-    fmt::format_to_n(buffer, sizeof(buffer), "{}", ts);
-    return buffer;
-}
-
 }  // ns k2
 
 // formatters

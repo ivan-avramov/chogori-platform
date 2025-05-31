@@ -57,4 +57,4 @@ trap finish EXIT
 sleep 1
 
 echo ">>> Starting http test ..."
-PYTHONPATH=${PYTHONPATH}:./test/integration ./test/integration/test_http.py --http http://127.0.0.1:30000
+PYTHONPATH=${PYTHONPATH}:./test/integration ./test/integration/test_http.py --http http://127.0.0.1:31000

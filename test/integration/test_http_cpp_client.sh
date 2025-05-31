@@ -56,4 +56,4 @@ trap finish EXIT
 sleep 1
 
 echo ">>> Starting http test ..."
-./src/skvhttpclient/build/test/client_integration_test
+./src/skvhttpclient/build/test/client_integration_test "localhost" 31000

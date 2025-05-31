@@ -37,7 +37,7 @@ namespace k2::log {
 
 using namespace skv::http;
 
-Client client;
+std::unique_ptr<Client> client;
 const std::string collectionName = "k23si_test_collection";
 const std::string schemaName = "test_schema";
 
@@ -95,7 +95,7 @@ dto::SKVRecord buildRecord(const std::string& collectionName, std::shared_ptr<dt
 
 // Populate initial data
 void writeRecord(dto::SKVRecord& record) {
-    auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+    auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
     K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
     auto&& [writeStatus] = txn.write(record).get();
@@ -123,7 +123,9 @@ void testCreateCollection() {
     .deleted = false
   };
   std::vector<std::string> rangeEnds{""};
-  auto&& [status] = client.createCollection(std::move(metadata), std::move(rangeEnds)).get();
+  auto&& rr = client->createCollection(std::move(metadata), std::move(rangeEnds));
+  sleep(30);
+  auto [status] = rr.get();
   K2LOG_I(k2::log::httpclient, "crateCollection respone status: {}", status);
   K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 }
@@ -138,7 +140,7 @@ void testCreateHashCollection() {
     .heartbeatDeadline = Duration(0),
     .deleted = false
   };
-  auto&& [status] = client.createCollection(std::move(metadata), {}).get();
+  auto&& [status] = client->createCollection(std::move(metadata), {}).get();
   K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 }
 
@@ -159,16 +161,16 @@ void testCreateSchema() {
     schema.setPartitionKeyFieldsByName(std::vector<String>{"LastName"});
     schema.setRangeKeyFieldsByName(std::vector<String>{"FirstName"});
 
-    auto&& [status] = client.createSchema(collectionName, schema).get();
+    auto&& [status] = client->createSchema(collectionName, schema).get();
     K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 }
 
 // Tests getSchema, beginTxn, write, and endTxn
 void testBasicWritePath() {
-  auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+  auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
   K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 
-  auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+  auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
   K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
   dto::SKVRecordBuilder builder(collectionName, schemaPtr);
@@ -186,10 +188,10 @@ void testBasicWritePath() {
 }
 
 void testRead() {
-  auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName).get();
+  auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName).get();
   K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 
-  auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+  auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
   K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
   dto::SKVRecordBuilder builder(collectionName, schemaPtr);
@@ -225,10 +227,10 @@ std::vector<dto::SKVRecord> queryAll(TxnHandle& txn, const std::string& collecti
 }
 
 void testQuery() {
-    auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName).get();
+    auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName).get();
     K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 
-    auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+    auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
     K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
     dto::SKVRecordBuilder startBuilder(collectionName, schemaPtr);
@@ -271,7 +273,7 @@ void testQuery() {
 namespace dtoe = dto::expression;
 
 void testQuery1() {
-    auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName).get();
+    auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName).get();
     K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 
     // Records to compare with, record1 already populated by previous tests
@@ -282,7 +284,7 @@ void testQuery1() {
     auto start = buildRecord(collectionName, schemaPtr);
     auto end = buildRecord(collectionName, schemaPtr);
 
-    auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+    auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
     K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
     {
@@ -367,10 +369,10 @@ void testQuery1() {
 }
 
 void testPartialUpdate() {
-    auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+    auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
     K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
 
-    auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+    auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
     K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
     auto record = buildRecord(collectionName, schemaPtr, std::string("A1"), std::string("B1"), 33, std::string("Test1"));
     {
@@ -450,10 +452,10 @@ void testPartialUpdate() {
 }
 
 void testValidation() {
-  auto&& [schemaStatus, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+  auto&& [schemaStatus, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
   K2EXPECT(k2::log::httpclient, schemaStatus.is2xxOK(), true);
 
-  auto&& [beginStatus, txn] = client.beginTxn(dto::TxnOptions{}).get();
+  auto&& [beginStatus, txn] = client->beginTxn(dto::TxnOptions{}).get();
   K2EXPECT(k2::log::httpclient, beginStatus.is2xxOK(), true);
 
   {
@@ -464,12 +466,12 @@ void testValidation() {
   }
   {
       // Get bad shema
-      auto&& [status, ingoreSchema] = client.getSchema(collectionName, schemaName + "1", 1).get();
+      auto&& [status, ingoreSchema] = client->getSchema(collectionName, schemaName + "1", 1).get();
       K2EXPECT(k2::log::httpclient, status.code, 404);
   }
   {
       // Bad schema version
-      auto&& [status, ignoreSchema] = client.getSchema(collectionName, schemaName, 2).get();
+      auto&& [status, ignoreSchema] = client->getSchema(collectionName, schemaName, 2).get();
       K2EXPECT(k2::log::httpclient, status.code, 404);
   }
   // Bad partition key type
@@ -492,17 +494,17 @@ void testValidation() {
 }
 
 void testReadWriteConflict() {
-  auto&& [schemaStatus, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+  auto&& [schemaStatus, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
   K2EXPECT(k2::log::httpclient, schemaStatus.is2xxOK(), true);
   auto record = buildRecord(collectionName, schemaPtr, std::string("ATest"), std::string("BTest"), int32_t(10), std::string("data1"));
 
   // Populate initial data
   writeRecord(record);
 
-  auto&& [beginStatus1, txn1] = client.beginTxn(dto::TxnOptions{}).get();
+  auto&& [beginStatus1, txn1] = client->beginTxn(dto::TxnOptions{}).get();
   K2EXPECT(k2::log::httpclient, beginStatus1.is2xxOK(), true);
 
-  auto&& [beginStatus2, txn2] = client.beginTxn(dto::TxnOptions{}).get();
+  auto&& [beginStatus2, txn2] = client->beginTxn(dto::TxnOptions{}).get();
   K2EXPECT(k2::log::httpclient, beginStatus2.is2xxOK(), true);
 
   {
@@ -528,20 +530,26 @@ void testReadWriteConflict() {
 
 void testDropCollection() {
     {
-        auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+        auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
         K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
     }
     {
-        auto&& [status] = client.dropCollection(collectionName).get();
+        auto&& [status] = client->dropCollection(collectionName).get();
         K2EXPECT(k2::log::httpclient, status.is2xxOK(), true);
     }
     {
-        auto&& [status, schemaPtr] = client.getSchema(collectionName, schemaName, 1).get();
+        auto&& [status, schemaPtr] = client->getSchema(collectionName, schemaName, 1).get();
         K2EXPECT(k2::log::httpclient, status.code, 404);
     }
 }
 
-int main() {
+int main(int argc, char** argv) {
+  k2::logging::Logger::threadLocalLogLevel = k2::logging::LogLevel::Debug;
+  if (argc != 3) {
+    std::cerr << "Usage: " << argv[0] << " <server> <port>" << std::endl;
+    return 1;
+  }
+  client = std::make_unique<Client>(argv[1], std::stoi(argv[2]));
   testCreateCollection();
   testCreateHashCollection();
   testCreateSchema();

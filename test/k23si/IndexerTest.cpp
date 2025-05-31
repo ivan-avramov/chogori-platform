@@ -29,7 +29,7 @@ Copyright(c) 2020 Futurewei Cloud
 namespace k2 {
 SCENARIO("test01 empty indexer") {
     auto indexer = Indexer();
-    indexer.start(dto::Timestamp{.endCount=100000, .tsoId=1, .startDelta=1000}).get0();
+    indexer.start(dto::Timestamp{.endCount=100000, .tsoId=1, .startDelta=1000}).get();
     REQUIRE(indexer.size() == 0);
     REQUIRE_THROWS(indexer.find(dto::Key{}));
 }
@@ -40,7 +40,7 @@ SCENARIO("test02 empty schema") {
     dto::Timestamp start{.endCount=60000, .tsoId=1, .startDelta=1000};
     dto::Timestamp newer{.endCount=70000, .tsoId=1, .startDelta=1000};
     dto::Timestamp newest{.endCount=80000, .tsoId=1, .startDelta=1000};
-    indexer.start(start).get0();
+    indexer.start(start).get();
     dto::Schema sch;
     sch.name = "schema1";
     dto::Key k1{.schemaName = sch.name, .partitionKey = "Key1", .rangeKey = "rKey1"};
@@ -89,7 +89,7 @@ SCENARIO("test03 add, abort, commit new key") {
     dto::Timestamp start{.endCount = 60000, .tsoId = 1, .startDelta = 1000};
     dto::Timestamp newer{.endCount = 70000, .tsoId = 1, .startDelta = 1000};
     dto::Timestamp newest{.endCount = 80000, .tsoId = 1, .startDelta = 1000};
-    indexer.start(start).get0();
+    indexer.start(start).get();
     dto::Schema sch;
     sch.name = "schema1";
     dto::Key k1{.schemaName = sch.name, .partitionKey = "KeyAAA", .rangeKey = "rKey1"};
@@ -196,7 +196,7 @@ SCENARIO("test04 add, abort, commit with existing key") {
     dto::Timestamp start{.endCount = 60000, .tsoId = 1, .startDelta = 1000};
     dto::Timestamp newer{.endCount = 70000, .tsoId = 1, .startDelta = 1000};
     dto::Timestamp newest{.endCount = 80000, .tsoId = 1, .startDelta = 1000};
-    indexer.start(start).get0();
+    indexer.start(start).get();
     dto::Schema sch;
     sch.name = "schema1";
     dto::Key k1{.schemaName = sch.name, .partitionKey = "KeyAAA", .rangeKey = "rKey1"};
@@ -278,7 +278,7 @@ SCENARIO("test05 read in multiple versions") {
     dto::Timestamp newest{.endCount = 80000, .tsoId = 1, .startDelta = 1000};
     dto::Timestamp newest_p{.endCount = 80005, .tsoId = 1, .startDelta = 1000};
 
-    indexer.start(start).get0();
+    indexer.start(start).get();
     dto::Schema sch;
     sch.name = "schema1";
     dto::Key k1{.schemaName = sch.name, .partitionKey = "KeyAAA", .rangeKey = "rKey1"};
@@ -370,7 +370,7 @@ SCENARIO("test 06 multi-key iterate and observation") {
     for (uint32_t i = 1000; i < 1020; ++i) {
         ts.push_back(dto::Timestamp{.endCount=i, .tsoId=1, .startDelta=1000});
     }
-    indexer.start(ts[0]).get0();
+    indexer.start(ts[0]).get();
     dto::Schema sch;
     sch.name = "schema1";
     indexer.createSchema(sch);

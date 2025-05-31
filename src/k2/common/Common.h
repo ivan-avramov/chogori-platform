@@ -176,10 +176,6 @@ public:
         return result;
     }
 
-    inline static String encode(const std::string& str) {
-        return encode(str.data(), str.size());
-    }
-
     inline static String encode(const String& str) {
         return encode(str.data(), str.size());
     }
@@ -205,10 +201,6 @@ public:
         result[c] = '\0';
         result.resize(c);
         return result;
-    }
-
-    inline static String decode(const std::string& str) {
-        return decode(str.data(), str.size());
     }
 
     inline static String decode(const String& str) {
@@ -247,89 +239,6 @@ inline CachedSteadyClock::time_point CachedSteadyClock::now(bool refresh) noexce
 }
 
 }  //  namespace k2
-
-template <> // fmt support
-struct fmt::formatter<k2::String> {
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(k2::String const& str, FormatContext& ctx) {
-        k2::String encoded = k2::HexCodec::encode(str);
-        return fmt::format_to(ctx.out(), "{}", encoded.data());
-    }
-};
-
-template <> // fmt support
-struct fmt::formatter<std::set<k2::String>> {
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(std::set<k2::String> const& strset, FormatContext& ctx) {
-        fmt::format_to(ctx.out(), "{{");
-        size_t processed = 0;
-        for(auto it = strset.cbegin(); it != strset.cend(); ++it) {
-            if (processed == strset.size() - 1) {
-                fmt::format_to(ctx.out(), "{}", *it);
-            }
-            else {
-                fmt::format_to(ctx.out(), "{}, ", *it);
-            }
-        }
-        return fmt::format_to(ctx.out(), "}}");
-    }
-};
-
-template <> // fmt support
-struct fmt::formatter<std::vector<k2::String>> {
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(std::vector<k2::String> const& strvec, FormatContext& ctx) {
-        fmt::format_to(ctx.out(), "{{");
-        size_t processed = 0;
-        for(auto it = strvec.cbegin(); it != strvec.cend(); ++it) {
-            if (processed == strvec.size() - 1) {
-                fmt::format_to(ctx.out(), "{}", *it);
-            }
-            else {
-                fmt::format_to(ctx.out(), "{}, ", *it);
-            }
-        }
-        return fmt::format_to(ctx.out(), "}}");
-    }
-};
-
-template <> // fmt support for String
-struct fmt::formatter<std::unordered_set<k2::String>> {
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext& ctx) {
-        return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(std::unordered_set<k2::String> const& strset, FormatContext& ctx) {
-        fmt::format_to(ctx.out(), "{{");
-        size_t processed = 0;
-        for(auto it = strset.cbegin(); it != strset.cend(); ++it) {
-            if (processed == strset.size() - 1) {
-                fmt::format_to(ctx.out(), "{}", *it);
-            }
-            else {
-                fmt::format_to(ctx.out(), "{}, ", *it);
-            }
-        }
-        return fmt::format_to(ctx.out(), "}}");
-    }
-};
 
 template <>  // serialization support for String
 struct skv::http::Serializer<k2::String> {

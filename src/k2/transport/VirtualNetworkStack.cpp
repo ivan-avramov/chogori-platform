@@ -26,6 +26,7 @@ Copyright(c) 2020 Futurewei Cloud
 // third-party
 #include <seastar/core/reactor.hh>
 #include <seastar/net/net.hh>
+#include <seastar/net/posix-stack.hh>
 
 // k2
 #include "Log.h"
@@ -54,12 +55,18 @@ VirtualNetworkStack::~VirtualNetworkStack() {
 seastar::server_socket VirtualNetworkStack::listenTCP(SocketAddress sa, seastar::listen_options opt) {
     K2LOG_D(log::tx, "listen tcp on: {}", sa);
     // TODO For now, just use the engine's global network
-    return seastar::engine().net().listen(std::move(sa), std::move(opt));
+    // sometime in-between 2022-2025, seastar started forcing core 0 to be the only core which runs the posix stack
+    // all other cores run the posix_ap_network_stack which is virtual and routes all calls to core 0.
+    // so to get around this, we just crate the socket directly via posix_listen
+    const auto protocol = static_cast<int>(opt.proto);
+    return seastar::server_socket(std::make_unique<seastar::net::posix_server_socket_impl>(protocol, sa, seastar::engine().posix_listen(sa, opt), opt.lba, opt.fixed_cpu));
 }
 
 seastar::future<seastar::connected_socket>
 VirtualNetworkStack::connectTCP(SocketAddress remoteAddress, SocketAddress sourceAddress) {
     // TODO For now, just use the engine's global network
+    // as of 05/2025 seastar passes the connect call to the posix stack.
+    // so no need to do the gymnastics in listenTCP above.
     return seastar::engine().net().connect(std::move(remoteAddress), std::move(sourceAddress));
 }
 

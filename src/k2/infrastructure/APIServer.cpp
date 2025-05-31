@@ -37,20 +37,20 @@ class GetRoutesHandler : public seastar::httpd::handler_base  {
 public:
     GetRoutesHandler(std::function<String()> h) : _handler(std::move(h)) {}
 
-    seastar::future<std::unique_ptr<seastar::httpd::reply>> handle(const String& path,
-        std::unique_ptr<seastar::httpd::request> req, std::unique_ptr<seastar::httpd::reply> rep) override {
+    seastar::future<std::unique_ptr<seastar::http::reply>> handle(const String& path,
+        std::unique_ptr<seastar::http::request> req, std::unique_ptr<seastar::http::reply> rep) override {
         (void) path;
         (void) req;
         rep->write_body("txt", _handler());
-        return seastar::make_ready_future<std::unique_ptr<seastar::httpd::reply>>(std::move(rep));
+        return seastar::make_ready_future<std::unique_ptr<seastar::http::reply>>(std::move(rep));
     }
 
 private:
     std::function<String()> _handler;
 };
 
-seastar::future<std::unique_ptr<seastar::httpd::reply>> APIRouteHandler::handle(const String&,
-    std::unique_ptr<seastar::httpd::request> req, std::unique_ptr<seastar::httpd::reply> rep)  {
+seastar::future<std::unique_ptr<seastar::http::reply>> APIRouteHandler::handle(const String&,
+    std::unique_ptr<seastar::http::request> req, std::unique_ptr<seastar::http::reply> rep)  {
 
     // seastar returns a 200 status code by default, which is what we want. The k2 status code will
     // be embedded in the returned json object
@@ -101,14 +101,14 @@ seastar::future<std::unique_ptr<seastar::httpd::reply>> APIRouteHandler::handle(
     .then([rep=std::move(rep)] (auto&& payload) mutable {
         const String& ctype= ContentTypeStrings[to_integral(payload.ctype)];
         rep->write_body(ctype, [payload=std::move(payload)] (auto&& os)  mutable {
-            return do_with(std::move(os), payload=std::move(payload), [] (auto& os, auto& payload) {
+            return do_with(std::move(os), std::move(payload), [] (auto& os, auto& payload) {
                 return os.write(payload.data)
                 .finally([& os] {
                     return os.close();
                 });
             });
         });
-        return seastar::make_ready_future<std::unique_ptr<seastar::httpd::reply>>(std::move(rep));
+        return seastar::make_ready_future<std::unique_ptr<seastar::http::reply>>(std::move(rep));
     });
 }
 
@@ -121,7 +121,7 @@ APIServer::start() {
     }
     auto myPort = uint16_t(tcpEp->port + API_PORT_OFFSET);
     K2LOG_I(log::apisvr, "starting HTTP API server on port {}", myPort);
-    auto listenAddr = seastar::ipv4_addr(tcpEp->ip, myPort);
+    auto listenAddr = seastar::ipv4_addr(std::string(tcpEp->ip), myPort);
 
     return addRoutes()
         .then([this, listenAddr=std::move(listenAddr)]() {
@@ -135,7 +135,7 @@ seastar::future<> APIServer::gracefulStop() {
 }
 
 seastar::future<> APIServer::addRoutes() {
-    _server._routes.put(seastar::httpd::GET, "/api",
+    _server._routes.put(seastar::httpd::operation_type::GET, "/api",
             new GetRoutesHandler([this] () { return getCurrentRoutes();}));
     return seastar::make_ready_future<>();
 }
@@ -152,7 +152,7 @@ String APIServer::getCurrentRoutes() {
 void APIServer::registerRawAPIObserver(String pathSuffix, String description, APIRawObserver_t observer) {
     _registeredRoutes.emplace_back(Route{.suffix=pathSuffix, .descr=description});
 
-    _server._routes.put(seastar::httpd::POST, "/api/" + pathSuffix, new APIRouteHandler(
+    _server._routes.put(seastar::httpd::operation_type::POST, "/api/" + pathSuffix, new APIRouteHandler(
         [observer=std::move(observer)] (auto&& httpPayload) {
             return observer(std::move(httpPayload));
         }));
@@ -173,7 +173,7 @@ void APIServer::deregisterAPIObserver(String pathSuffix) {
         return;
     }
 
-    auto handler =  _server._routes.drop(seastar::httpd::POST, "/api/" + pathSuffix);
+    auto handler =  _server._routes.drop(seastar::httpd::operation_type::POST, "/api/" + pathSuffix);
     delete handler;
 }
 

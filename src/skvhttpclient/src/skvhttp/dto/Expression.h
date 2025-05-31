@@ -96,21 +96,22 @@ struct Value {
     }
 
     // custom formatting
-    friend std::ostream& operator<<(std::ostream&os, const Value& val) {
+    template <typename FormatContext>
+    static auto ___K2___INTERNAL_fmt_helper(const Value& v, FormatContext& ctx) {
         std::ostringstream otype;
-        otype << val.type;
+        otype << v.type;
 
         std::ostringstream lit;
-        if (val.isReference()) {
+        if (v.isReference()) {
             lit << "REFERENCE";
         } else {
-            if (val.type != FieldType::NULL_T && val.type != FieldType::NOT_KNOWN && val.type != FieldType::NULL_LAST) {
+            if (v.type != FieldType::NULL_T && v.type != FieldType::NOT_KNOWN && v.type != FieldType::NULL_LAST) {
                 // no need to log the other types - we wrote what they are above.
                 try {
-                    applyTyped(val, [&val, &os](const auto& afr) {
+                    applyTyped(v, [&v, &ctx](const auto& afr) {
                         using T = applied_type_t<decltype(afr)>;
                         auto obj = afr.field.template get<T>();
-                        os << obj;
+                        fmt::format_to(ctx.out(), FMT_STRING("{}"), obj);
                     });
                 } catch (const std::exception& e) {
                     // just in case, log the exception here so that we can do something about it
@@ -119,10 +120,11 @@ struct Value {
                 }
             }
         }
-        return os << "{fieldName: " << val.fieldName
-            << ", type: " << skv::http::HexCodec::encode(otype.str())
-            << ", literal: " << skv::http::HexCodec::encode(lit.str())
-            << "}";
+        return fmt::format_to(ctx.out(),
+                FMT_STRING("{{fieldName={}, type={}, literal={}}}"),
+                v.fieldName,
+                skv::http::HexCodec::encode(otype.str()),
+                skv::http::HexCodec::encode(lit.str()));
     }
 };
 

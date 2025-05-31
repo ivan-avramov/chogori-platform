@@ -124,7 +124,7 @@ private:
 
     // pulls the current metrics and returns the http reply as would be rendered if
     // one calls the http :/metrics endpoint
-    seastar::future<std::unique_ptr<seastar::httpd::reply>> _pullMetrics();
+    seastar::future<std::unique_ptr<seastar::http::reply>> _pullMetrics();
 
     // push metrics loop for sending metrics out to pushProxy
     seastar::future<>

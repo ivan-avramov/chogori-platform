@@ -675,7 +675,7 @@ seastar::future<bool> CPOService::_offloadCollection(dto::Collection& collection
     return seastar::when_all(futs.begin(), futs.end())
     .then([] (std::vector<seastar::future<bool>>&& futures) {
         for (auto& fut : futures) {
-            if (fut.failed() || !fut.get0()) {
+            if (fut.failed() || !fut.get()) {
                 return false;
             }
         }

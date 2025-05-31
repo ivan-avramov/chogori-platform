@@ -42,12 +42,12 @@ def genlst(N):
 
 
 def genvars(N):
-    print('// _K2_MKVARS(...) generates a list for formatting variables, e.g. _K2_MKVARS(a, b, c) -> o.a, o.b, o.c')
+    print('// _K2_MKVARS(...) generates a list for formatting variables, e.g. _K2_MKVARS(a, b, c) -> joinable(o.a), joinable(o.b), joinable(o.c)')
     vrs=["a1"]
     mn = "_K2_MKVARS"
     print("#define", mn + "(...) _K2_OVERLOADED_MACRO(" + mn + ", __VA_ARGS__)")
     print("#define", mn + "0()")
-    print("#define", mn + "1(a1) , o.a1")
+    print("#define", mn + "1(a1) , joinable(o.a1)")
     for i in range(2,N):
         vrs.append("a" + str(i))
         v = " ".join(["#define",

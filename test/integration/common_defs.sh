@@ -11,4 +11,4 @@ PERSISTENCE=tcp+k2rpc://0.0.0.0:12001
 CPO=tcp+k2rpc://0.0.0.0:9000
 TSO=tcp+k2rpc://0.0.0.0:13000
 COMMON_ARGS="--reactor-backend=epoll --enable_tx_checksum true --thread-affinity false"
-HTTP=tcp+k2rpc://0.0.0.0:20000
+HTTP=tcp+k2rpc://0.0.0.0:21000

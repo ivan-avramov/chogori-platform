@@ -76,19 +76,12 @@ public:
         return b;
     }
 
-    template <typename OStream_T>
-    friend OStream_T& operator<<(OStream_T& os, const Binary& o) {
-        (void)o;
-        if constexpr (std::is_same<OStream_T, std::ostream>::value) {
-            fmt::print(os,
-                       FMT_STRING("{{binary({})}}"), o.size());
-        } else {
-            fmt::format_to(os.out(),
-                           FMT_COMPILE("{{binary({})}}"), o.size());
-        }
-        return os;
+    template <typename FormatContext>
+    static auto ___K2___INTERNAL_fmt_helper(const Binary& b, FormatContext& ctx) {
+        return fmt::format_to(ctx.out(),
+                FMT_STRING("{}"),
+                b._size);
     }
-
 private:
     struct _SharedState {
         template<typename Deleter>

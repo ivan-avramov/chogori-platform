@@ -134,7 +134,7 @@ k2d::SKVRecord makeRec() {
 
 void runner(std::vector<TestCase>& tcases) {
     for (auto& tcase: tcases) {
-        K2LOG_I(log::k23si, "tcase name: {}", tcase.name);
+        K2LOG_I(log::k23si, "tcase name: {}, expr: {}", tcase.name, tcase.expr);
         try {
             bool result = tcase.run();
             if (tcase.expectedResult.has_value()) {

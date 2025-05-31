@@ -61,7 +61,7 @@ class MultiAddressProvider : public k2::IAddressProvider {
             K2LOG_D(log::appbase, "On core {} have url {}", coreID, _urls[coreID]);
             auto ep = k2::TXEndpoint::fromURL(_urls[coreID], BinaryAllocator());
             if (ep) {
-                return seastar::socket_address(seastar::ipv4_addr(ep->ip, uint16_t(ep->port)));
+                return seastar::socket_address(seastar::ipv4_addr(std::string(ep->ip.c_str()), uint16_t(ep->port)));
             }
             // might not be in URL form (e.g. just a plain port)
             K2LOG_D(log::appbase, "attempting to use url as a simple port");
@@ -90,6 +90,13 @@ public:  // API
                 _name[i] = '_';
             }
         }
+        {
+            // override some default seastar options for easy cmd line tool usage
+            seastar::app_template::seastar_options opts;
+            opts.smp_opts.memory.set_default_value("50M");
+            opts.smp_opts.smp.set_default_value(1);
+            _app = std::make_unique<seastar::app_template>(std::move(opts));
+        }
         // add the discovery applet o all apps
         addApplet<k2::Discovery>();
     }
@@ -99,7 +106,7 @@ public:  // API
        public:
         PosOptAdder(App* app) : _app(app) {}
         PosOptAdder& operator()(const char* name, const bpo::value_semantic* value_semantic, const char* help, int max_count) {
-            _app->_app.add_positional_options({{name, value_semantic, help, max_count}});
+            _app->_app->add_positional_options({{name, value_semantic, help, max_count}});
             return *this;
         }
 
@@ -108,7 +115,7 @@ public:  // API
     };
     // Use this method to obtain a callable which can be used to add additional
     // command-line options (see how we use it below)
-    bpo::options_description_easy_init addOptions() { return _app.add_options(); }
+    bpo::options_description_easy_init addOptions() { return _app->add_options(); }
 
     // Use this method to add positional options. The method returns an option applier much like getOptions() above
     PosOptAdder addPositionalOptions() {
@@ -171,7 +178,7 @@ public:  // API
 
 private:
     String _name;
-    seastar::app_template _app;
+    std::unique_ptr<seastar::app_template> _app;
     TypeMap<void*> _applets;
     std::vector<std::function<seastar::future<>()>> _ctors;     // functors which create user applets
     std::vector<std::function<seastar::future<>()>> _starters;  // functors which call start() on user applets

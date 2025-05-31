@@ -53,7 +53,7 @@ template<typename Func>
                 this->_try++;
                 return func().
                     then_wrapped([this] (auto&& fut) {
-                        _success = !fut.failed() && fut.get0();
+                        _success = !fut.failed() && fut.get();
                         K2LOG_D(log::tpcc, "round {} ended with success={}", _try, _success);
                         return make_ready_future<>();
                     });
@@ -180,7 +180,7 @@ private:
                     return make_ready_future<bool>(false);
                 }
 
-                EndResult result = fut.get0();
+                EndResult result = fut.get();
 
                 if (result.status.is2xxOK() && ! _failed) {
                     return make_ready_future<bool>(true);
@@ -465,7 +465,7 @@ private:
                 return make_ready_future<bool>(false);
             }
 
-            EndResult result = fut.get0();
+            EndResult result = fut.get();
 
             if (result.status.is2xxOK() && ! _failed) {
                 return make_ready_future<bool>(true);
@@ -585,7 +585,7 @@ private:
                 return make_ready_future<bool>(false);
             }
 
-            EndResult result = fut.get0();
+            EndResult result = fut.get();
             if (result.status.is2xxOK() && !_failed) {
                 return make_ready_future<bool>(true);
             }
@@ -1279,7 +1279,7 @@ private:
                 return make_ready_future<bool>(false);
             }
 
-            EndResult result = fut.get0();
+            EndResult result = fut.get();
             if (result.status.is2xxOK() && !_failed) {
                 return make_ready_future<bool>(true);
             }

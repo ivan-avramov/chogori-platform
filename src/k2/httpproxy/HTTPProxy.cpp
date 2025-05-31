@@ -127,9 +127,10 @@ HTTPProxy::_handleCreateCollection(shd::CollectionCreateRequest&& request) {
     for(auto& re: request.rangeEnds) {
         rends.push_back(re);
     }
-
+    K2LOG_D(log::httpproxy, "Creating collection with metadata: {}, range ends: {}", meta, rends);
     return _client.makeCollection(std::move(meta), std::move(rends))
         .then([](Status&& status) {
+            K2LOG_D(log::httpproxy, "Create collection response status: {}", status);
             return MakeHTTPResponse<shd::CollectionCreateResponse>(sh::Status{.code=status.code, .message=status.message}, shd::CollectionCreateResponse{});
         });
 }

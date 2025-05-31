@@ -23,8 +23,8 @@ Copyright(c) 2020 Futurewei Cloud
 
 #define CATCH_CONFIG_MAIN
 // std
-#include <k2/transport/Payload.h>
 #include <k2/common/Common.h>
+#include <k2/transport/Payload.h>
 #include <k2/transport/PayloadSerialization.h>
 // catch
 #include "catch2/catch.hpp"
